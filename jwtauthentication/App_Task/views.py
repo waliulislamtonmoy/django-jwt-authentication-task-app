@@ -44,8 +44,26 @@ class TaskAddView(APIView):
         
         except Exception as e:  
             return Response({'status': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-       
+        
+        
+class TaskUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    def put(self,reqest,id):
+        try:
+            task=Task.objects.get(id=id) 
+            if 'title' in reqest.data:
+                task.title=reqest.data['title']
+            if 'description' in reqest.data:
+                task.description=reqest.data['description']
+                task.save()
+                return Response({'status':True,'data':'Task update successfully'}) 
+        except:
+            return Response({'status': False, 'error': 'task update not successfulll'})
+
 class TaskDeleteView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     def delete(self,request,id):
         try:
             data=Task.objects.get(id=id).delete()
