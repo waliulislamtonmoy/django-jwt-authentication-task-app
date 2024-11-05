@@ -64,12 +64,19 @@ class TaskUpdateView(APIView):
 class TaskDeleteView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
-    def delete(self,request,id):
+    def delete(self, request, id):
         try:
-            data=Task.objects.get(id=id).delete()
-            return Response({'status':True,'message':'task delete successfully'})
-        except:
-            return Response({'status':False,'message':'Task Not Delete Successfully'})
+            task = Task.objects.get(id=id)
+            if task.user != request.user:
+                return Response({'status': False, 'message': 'You do not have permission to delete this task'}, status=status.HTTP_403_FORBIDDEN)
+            task.delete()
+            return Response({'status': True, 'message': 'Task deleted successfully'}, status=status.HTTP_200_OK)
+        
+        except Task.DoesNotExist:
+            return Response({'status': False, 'message': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response({'status': False, 'message': 'Task could not be deleted', 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         
     
