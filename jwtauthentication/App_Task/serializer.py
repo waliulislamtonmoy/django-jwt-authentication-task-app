@@ -8,10 +8,11 @@ class UserSerializer(ModelSerializer):
         fields=['username','email']
 
 class TaskSerializer(ModelSerializer):
-    user=UserSerializer()
+    user = UserSerializer(read_only=True)
     class Meta:
-        model=Task
-        fields='__all__'
+        model = Task
+        fields = '__all__'
+        read_only_fields = ['user'] 
         depth=1
     
     

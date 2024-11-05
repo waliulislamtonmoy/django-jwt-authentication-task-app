@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework import status
 
 class TaskView(APIView):
     permission_classes=[IsAuthenticated,]
@@ -29,16 +30,20 @@ class TaskDetailView(APIView):
             return Response({'message':'no task found for this user'})
         
 class TaskAddView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     def post(self, request):
-       try: 
-            data=request.data
-            print(data)
-            serializer = TaskSerializer(data,context={'request': request})
+        try:
+            data = request.data.copy()
+            serializer = TaskSerializer(data=data)
             if serializer.is_valid():
-                serializer.save()
-                return Response({'status': True, 'message': 'New task added successfully', 'Task': serializer.data})
-       except:    
-           return Response({'status': False, 'error': serializer.error_messages})
+                serializer.save(user=request.user)
+                return Response({'status': True, 'message': 'New task added successfully', 'Task': serializer.data}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({'status': False, 'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Exception as e:  
+            return Response({'status': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
        
 class TaskDeleteView(APIView):
     def delete(self,request,id):
