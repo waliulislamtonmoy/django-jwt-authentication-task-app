@@ -14,6 +14,43 @@ class TaskView(APIView):
             return Response({'task':serializer.data})
         except:
             return Response({'message':'no task found'})
+        
+class TaskDetailView(APIView):
+    def get(self,request,id):
+        try:
+            data=Task.objects.get(id=id)
+            serializer=TaskSerializer(data)
+            return Response({'task':serializer.data})
+        except:
+            return Response({'message':'no task found'})
+        
+class TaskAddView(APIView):
+    def post(self, request):
+       try: 
+            data=request.data
+            print(data)
+            serializer = TaskSerializer(data,context={'request': request})
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'status': True, 'message': 'New task added successfully', 'Task': serializer.data})
+       except:    
+           return Response({'status': False, 'error': serializer.error_messages})
+       
+class TaskDeleteView(APIView):
+    def delete(self,request,id):
+        try:
+            data=Task.objects.get(id=id).delete()
+            return Response({'status':True,'message':'task delete successfully'})
+        except:
+            return Response({'status':False,'message':'Task Not Delete Successfully'})
+        
+        
+    
+        
+        
+        
+        
+        
 
     
             
