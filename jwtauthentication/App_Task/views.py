@@ -5,11 +5,15 @@ from App_Task.models import Task
 from App_Task.serializer import TaskSerializer
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 class TaskView(APIView):
+    permission_classes=[IsAuthenticated,]
+    parser_classes=[JWTAuthentication,]
     def get(self,request):
         try:
-            data=Task.objects.all().order_by('-id') 
+            data=Task.objects.all().order_by('-id').filter(user=request.user)
             serializer=TaskSerializer(data,many=True)
             return Response({'task':serializer.data})
         except:
@@ -22,7 +26,7 @@ class TaskDetailView(APIView):
             serializer=TaskSerializer(data)
             return Response({'task':serializer.data})
         except:
-            return Response({'message':'no task found'})
+            return Response({'message':'no task found for this user'})
         
 class TaskAddView(APIView):
     def post(self, request):
