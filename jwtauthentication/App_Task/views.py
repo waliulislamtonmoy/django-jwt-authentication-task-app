@@ -1,5 +1,7 @@
 from django.shortcuts import render
 
+from django.contrib.auth.forms import UserCreationForm
+
 # Create your views here.
 from App_Task.models import Task
 from App_Task.serializer import TaskSerializer
@@ -8,6 +10,18 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework import status
+
+
+
+class UserSignUpView(APIView):
+    def post(self,request):
+        data=request.POST 
+        form=UserCreationForm(data=data)
+        if form.is_valid():
+            form.save()
+            return Response({'status':'True','message':"user creation successfully"})
+        else:
+            return Response({'status':False,"message":"user not created"})
 
 class TaskView(APIView):
     permission_classes=[IsAuthenticated,]
